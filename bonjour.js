@@ -22,6 +22,25 @@ const session = require('express-session');
 const Keycloak = require('keycloak-connect');
 const {Tracer, ExplicitContext, BatchRecorder, ConsoleRecorder} = require('zipkin');
 const zipkinMiddleware = require('zipkin-instrumentation-express').expressMiddleware;
+
+// chaining
+const roi = require('roi');
+const circuitBreaker = require('opossum');
+
+// circuit breaker
+const circuitOptions = {
+  maxFailures: 5,
+  timeout: 1000,
+  resetTimeout: 10000
+};
+const nextService = 'hola';
+const circuit = circuitBreaker(roi.get, circuitOptions);
+circuit.fallback(() => (`The ${nextService} service is currently unavailable.`));
+
+const chainingOptions = {
+  endpoint: 'http://hola:8080/api/hola-chaining'
+};
+
 const ctxImpl = new ExplicitContext();
 const {HttpLogger} = require('zipkin-transport-http');
 var os = require('os');
@@ -32,7 +51,7 @@ var recorder;
 if (process.env.ZIPKIN_SERVER_URL === undefined) {
   console.log('No ZIPKIN_SERVER_URL defined. Printing zipkin traces to console.');
   recorder = new ConsoleRecorder();
-}else {
+} else {
   recorder = new BatchRecorder({
     logger: new HttpLogger({
       endpoint: process.env.ZIPKIN_SERVER_URL + '/api/v1/spans'
@@ -81,8 +100,8 @@ app.get('/', function (req, res) {
   res.send('Logged out');
 });
 
-function say_bonjour () {
-  return 'Bonjour de ' + os.hostname();
+function say_bonjour(){
+  return `Bonjour de ${os.hostname()}`;
 }
 
 app.get('/api/bonjour', function (req, resp) {
@@ -93,14 +112,19 @@ app.get( '/api/bonjour-secured', keycloak.protect(), function (req, resp) {
   resp.send("This is a Secured resource. You're logged as " + req.kauth.grant.access_token.content.name);
 } );
 
-
-
-app.get('/api/health', function (req, resp) {
-  resp.set('Access-Control-Allow-Origin', '*');
-  resp.send("I'm ok");
+app.get('/api/bonjour-chaining', function(req, resp) {
+  circuit.fire(chainingOptions).then((response) => {
+    resp.set('Access-Control-Allow-Origin', '*');
+    resp.send(response);
+  }).catch((e) => resp.send(e));
 });
 
-var server = app.listen(8080, '0.0.0.0', function () {
+app.get('/api/health', function(req, resp) {
+  resp.set('Access-Control-Allow-Origin', '*');
+  resp.send('I am ok');
+});
+
+var server = app.listen(8080, '0.0.0.0', function() {
   var host = server.address().address;
   var port = server.address().port;
 
