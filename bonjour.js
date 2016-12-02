@@ -80,10 +80,10 @@ app.use(zipkinMiddleware({
 }));
 
 // Configure keycloak based on keycloak.json and the KEYCLOAK_AUTH_SERVER_URL env var
-const custonKeyCloakConfig = JSON.parse(fs.readFileSync('keycloak.json').toString());
-custonKeyCloakConfig.authServerUrl = process.env.KEYCLOAK_AUTH_SERVER_URL;
+const customKeyCloakConfig = JSON.parse(fs.readFileSync('keycloak.json').toString());
+customKeyCloakConfig.authServerUrl = process.env.KEYCLOAK_AUTH_SERVER_URL;
 
-const keycloak = new Keycloak({ scope: 'USERS', store: memoryStore }, custonKeyCloakConfig);
+const keycloak = new Keycloak({ scope: 'USERS', store: memoryStore }, customKeyCloakConfig);
 
 app.use(keycloak.middleware({ logout: '/api/logout' }));
 
