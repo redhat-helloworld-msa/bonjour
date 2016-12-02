@@ -45,7 +45,6 @@ const ctxImpl = new ExplicitContext();
 const {HttpLogger} = require('zipkin-transport-http');
 var os = require('os');
 var app = express();
-var Config = require('keycloak-auth-utils').Config;
 
 var recorder;
 if (process.env.ZIPKIN_SERVER_URL === undefined) {
@@ -64,10 +63,8 @@ const tracer = new Tracer({
   ctxImpl // this would typically be a CLSContext or ExplicitContext
 });
 
-
 // Create a session-store to be used by both the express-session
 // middleware and the keycloak middleware.
-
 var memoryStore = new session.MemoryStore();
 
 app.use(session({
@@ -82,49 +79,49 @@ app.use(zipkinMiddleware({
   serviceName: 'bonjour' // name of this application
 }));
 
-//Configure keycloak based on keycloak.json and the KEYCLOAK_AUTH_SERVER_URL env var
+// Configure keycloak based on keycloak.json and the KEYCLOAK_AUTH_SERVER_URL env var
 const custonKeyCloakConfig = JSON.parse(fs.readFileSync('keycloak.json').toString());
 custonKeyCloakConfig.authServerUrl = process.env.KEYCLOAK_AUTH_SERVER_URL;
 
-const keycloak = new Keycloak({ scope: 'USERS', store: memoryStore}, custonKeyCloakConfig);
+const keycloak = new Keycloak({ scope: 'USERS', store: memoryStore }, custonKeyCloakConfig);
 
-app.use( keycloak.middleware( { logout: '/api/logout' } ));
+app.use(keycloak.middleware({ logout: '/api/logout' }));
 
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-    next();
+app.use(function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  next();
 });
 
 app.get('/', function (req, res) {
   res.send('Logged out');
 });
 
-function say_bonjour(){
+function sayBonjour () {
   return `Bonjour de ${os.hostname()}`;
 }
 
 app.get('/api/bonjour', function (req, resp) {
-  resp.send(say_bonjour());
+  resp.send(sayBonjour());
 });
 
-app.get( '/api/bonjour-secured', keycloak.protect(), function (req, resp) {
-  resp.send("This is a Secured resource. You're logged as " + req.kauth.grant.access_token.content.name);
-} );
+app.get('/api/bonjour-secured', keycloak.protect(), function (req, resp) {
+  resp.send(`This is a Secured resource. You're logged as ${req.kauth.grant.access_token.content.name}`);
+});
 
-app.get('/api/bonjour-chaining', function(req, resp) {
+app.get('/api/bonjour-chaining', function (req, resp) {
   circuit.fire(chainingOptions).then((response) => {
     resp.set('Access-Control-Allow-Origin', '*');
     resp.send(response);
   }).catch((e) => resp.send(e));
 });
 
-app.get('/api/health', function(req, resp) {
+app.get('/api/health', function (req, resp) {
   resp.set('Access-Control-Allow-Origin', '*');
   resp.send('I am ok');
 });
 
-var server = app.listen(8080, '0.0.0.0', function() {
+var server = app.listen(8080, '0.0.0.0', function () {
   var host = server.address().address;
   var port = server.address().port;
 
