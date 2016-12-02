@@ -43,10 +43,10 @@ const chainingOptions = {
 
 const ctxImpl = new ExplicitContext();
 const {HttpLogger} = require('zipkin-transport-http');
-var os = require('os');
-var app = express();
+const os = require('os');
+const app = express();
 
-var recorder;
+let recorder;
 if (process.env.ZIPKIN_SERVER_URL === undefined) {
   console.log('No ZIPKIN_SERVER_URL defined. Printing zipkin traces to console.');
   recorder = new ConsoleRecorder();
@@ -65,7 +65,7 @@ const tracer = new Tracer({
 
 // Create a session-store to be used by both the express-session
 // middleware and the keycloak middleware.
-var memoryStore = new session.MemoryStore();
+const memoryStore = new session.MemoryStore();
 
 app.use(session({
   secret: 'mySecret',
@@ -114,9 +114,9 @@ app.get('/api/health', (req, resp) => {
   resp.send('I am ok');
 });
 
-var server = app.listen(8080, '0.0.0.0', () => {
-  var host = server.address().address;
-  var port = server.address().port;
+const server = app.listen(8080, '0.0.0.0', () => {
+  const host = server.address().address;
+  const port = server.address().port;
 
   console.log('Bonjour service running at http://%s:%s', host, port);
 });
