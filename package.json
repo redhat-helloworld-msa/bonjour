@@ -21,7 +21,6 @@
     "express": "^4.13.4",
     "express-session": "^1.14.2",
     "keycloak-connect": "^2.4.0",
-    "levee": "~1.2.0",
     "opossum": "~0.1.1",
     "roi": "~0.13.0",
     "zipkin": "^0.2.5",
