@@ -87,41 +87,34 @@ const keycloak = new Keycloak({ scope: 'USERS', store: memoryStore }, custonKeyC
 
 app.use(keycloak.middleware({ logout: '/api/logout' }));
 
-app.use(function (req, res, next) {
+app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   next();
 });
 
-app.get('/', function (req, res) {
-  res.send('Logged out');
-});
+app.get('/', (req, res) => res.send('Logged out'));
 
-function sayBonjour () {
-  return `Bonjour de ${os.hostname()}`;
-}
+const sayBonjour = () => `Bonjour de ${os.hostname()}`;
 
-app.get('/api/bonjour', function (req, resp) {
-  resp.send(sayBonjour());
-});
+app.get('/api/bonjour', (req, resp) => resp.send(sayBonjour()));
 
-app.get('/api/bonjour-secured', keycloak.protect(), function (req, resp) {
-  resp.send(`This is a Secured resource. You're logged as ${req.kauth.grant.access_token.content.name}`);
-});
+app.get('/api/bonjour-secured', keycloak.protect(),
+  (req, resp) => resp.send(`This is a Secured resource. You're logged as ${req.kauth.grant.access_token.content.name}`));
 
-app.get('/api/bonjour-chaining', function (req, resp) {
+app.get('/api/bonjour-chaining', (req, resp) =>
   circuit.fire(chainingOptions).then((response) => {
     resp.set('Access-Control-Allow-Origin', '*');
     resp.send(response);
-  }).catch((e) => resp.send(e));
-});
+  }).catch((e) => resp.send(e))
+);
 
-app.get('/api/health', function (req, resp) {
+app.get('/api/health', (req, resp) => {
   resp.set('Access-Control-Allow-Origin', '*');
   resp.send('I am ok');
 });
 
-var server = app.listen(8080, '0.0.0.0', function () {
+var server = app.listen(8080, '0.0.0.0', () => {
   var host = server.address().address;
   var port = server.address().port;
 
