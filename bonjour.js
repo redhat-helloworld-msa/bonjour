@@ -33,12 +33,12 @@ const circuitOptions = {
   timeout: 1000,
   resetTimeout: 10000
 };
-const nextService = 'hola';
+const nextService = 'ola';
 const circuit = circuitBreaker(roi.get, circuitOptions);
 circuit.fallback(() => (`The ${nextService} service is currently unavailable.`));
 
 const chainingOptions = {
-  endpoint: 'http://hola:8080/api/hola-chaining'
+  endpoint: `http://${nextService}:8080/api/${nextService}-chaining`
 };
 
 const ctxImpl = new ExplicitContext();
