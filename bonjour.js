@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const path = require('path');
 const express = require('express');
 const session = require('express-session');
 const swagger = require('swagger-express');
@@ -33,8 +34,9 @@ app.use(swagger.init(app, {
     title: 'Bonjour microservices application',
     description: 'Operations that can be invoked in the bonjour microservices'
   },
-  apis: ['./lib/api.js']
+  apis: ['./lib/api.yml']
 }));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Create a session-store to be used by both the express-session
 // middleware and the keycloak middleware.
@@ -48,12 +50,6 @@ app.use(session({
 
 // Use our zipkin integration
 app.use(zipkin);
-
-/**
- * @swagger
- * resourcePath: /api
- * prettyPrint: true
- */
 
 app.use('/api', api.secure(memoryStore));
 
