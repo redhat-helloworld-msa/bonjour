@@ -25,8 +25,8 @@ const app = express();
 app.use(swagger.init(app, {
   apiVersion: '1.0',
   swaggerVersion: '1.0',
-  basePath: 'http://localhost:3000',
-  swaggerURL: '/',
+  basePath: 'http://0.0.0.0:8080',
+  swaggerURL: '/swagger',
   swaggerJSON: '/api-docs.json',
   swaggerUI: './public/swagger',
   info: {
