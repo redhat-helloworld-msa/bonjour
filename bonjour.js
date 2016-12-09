@@ -17,25 +17,11 @@
 const path = require('path');
 const express = require('express');
 const session = require('express-session');
-const swagger = require('swagger-express');
 const zipkin = require('./lib/zipkin');
 const api = require('./lib/api');
 
 const app = express();
 
-app.use(swagger.init(app, {
-  apiVersion: '1.0',
-  swaggerVersion: '1.0',
-  basePath: 'http://0.0.0.0:8080',
-  swaggerURL: '/swagger',
-  swaggerJSON: '/api-docs.json',
-  swaggerUI: './public/swagger',
-  info: {
-    title: 'Bonjour microservices application',
-    description: 'Operations that can be invoked in the bonjour microservices'
-  },
-  apis: ['./lib/api.yml']
-}));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Create a session-store to be used by both the express-session

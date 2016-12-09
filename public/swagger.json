@@ -1,0 +1,89 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Bonjour microservices REST API",
+    "version": "1.0.0",
+    "description": "Operations that can be invoked on the bonjour microservice",
+    "license": {
+      "name": "Apache License Version 2.0",
+      "url": "https://github.com/redhat-helloworld-msa/bonjour/blob/master/LICENSE"
+    },
+    "contact": {
+      "name": "Red Hat Developers",
+      "url": "http://developers.redhat.com",
+      "email": "developer@redhat.com"
+    }
+  },
+  "basePath": "/",
+  "produces": ["text/plain","application/json"],
+
+  "paths": {
+    "/api/bonjour": {
+      "get": {
+        "summary": "Returns a greeting in French",
+        "description": "A greeting en français",
+        "produces": [ "text/plain" ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+
+    "/api/bonjour-chaining": {
+      "get": {
+        "summary": "Returns a greeting in French, plus greetings from other services in the chain",
+        "description": "An array of greetings - neato!",
+        "produces": [ "application/json" ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+
+    "/api/bonjour-secured": {
+      "get": {
+        "summary": "Returns a greeting in French. But only for authenticated users.",
+        "description": "An authenticated greeting",
+        "produces": [ "text/plain" ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+
+
+    "/api/health": {
+      "get": {
+        "summary": "Verifies the health of this microservice.",
+        "description": "Confirms the service is operational",
+        "produces": [ "text/plain" ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}
