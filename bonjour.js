@@ -27,6 +27,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Create a session-store to be used by both the express-session
 // middleware and the keycloak middleware.
 const memoryStore = new session.MemoryStore();
+
 app.use(session({
   secret: 'mySecret',
   resave: false,
@@ -37,14 +38,14 @@ app.use(session({
 // Use our zipkin integration
 app.use(zipkin);
 
-app.use('/api', api.secure(memoryStore));
-
 // Enable CORS
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   next();
 });
+
+app.use('/api', api.secure(memoryStore));
 
 // default route (should be swagger)
 app.get('/', (req, res) => res.send('Logged out'));
