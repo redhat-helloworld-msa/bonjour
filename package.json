@@ -20,6 +20,7 @@
     "es6-shim": "^0.35.1",
     "express": "^4.13.4",
     "express-session": "^1.14.2",
+    "keycloak-auth-utils": "^2.5.0",
     "keycloak-connect": "^2.4.0",
     "zipkin": "^0.2.5",
     "zipkin-context-cls": "^0.2.1",
