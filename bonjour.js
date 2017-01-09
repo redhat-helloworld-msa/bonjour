@@ -22,17 +22,35 @@ const session = require('express-session');
 const Keycloak = require('keycloak-connect');
 const {Tracer, ExplicitContext, BatchRecorder, ConsoleRecorder} = require('zipkin');
 const zipkinMiddleware = require('zipkin-instrumentation-express').expressMiddleware;
+
+// chaining
+const roi = require('roi');
+const circuitBreaker = require('opossum');
+
+// circuit breaker
+const circuitOptions = {
+  maxFailures: 5,
+  timeout: 1000,
+  resetTimeout: 10000
+};
+const nextService = 'ola';
+const circuit = circuitBreaker(roi.get, circuitOptions);
+circuit.fallback(() => (`The ${nextService} service is currently unavailable.`));
+
+const chainingOptions = {
+  endpoint: `http://${nextService}:8080/api/${nextService}-chaining`
+};
+
 const ctxImpl = new ExplicitContext();
 const {HttpLogger} = require('zipkin-transport-http');
-var os = require('os');
-var app = express();
-var Config = require('keycloak-auth-utils').Config;
+const os = require('os');
+const app = express();
 
-var recorder;
+let recorder;
 if (process.env.ZIPKIN_SERVER_URL === undefined) {
   console.log('No ZIPKIN_SERVER_URL defined. Printing zipkin traces to console.');
   recorder = new ConsoleRecorder();
-}else {
+} else {
   recorder = new BatchRecorder({
     logger: new HttpLogger({
       endpoint: process.env.ZIPKIN_SERVER_URL + '/api/v1/spans'
@@ -45,11 +63,9 @@ const tracer = new Tracer({
   ctxImpl // this would typically be a CLSContext or ExplicitContext
 });
 
-
 // Create a session-store to be used by both the express-session
 // middleware and the keycloak middleware.
-
-var memoryStore = new session.MemoryStore();
+const memoryStore = new session.MemoryStore();
 
 app.use(session({
   secret: 'mySecret',
@@ -63,46 +79,44 @@ app.use(zipkinMiddleware({
   serviceName: 'bonjour' // name of this application
 }));
 
-//Configure keycloak based on keycloak.json and the KEYCLOAK_AUTH_SERVER_URL env var
-const custonKeyCloakConfig = JSON.parse(fs.readFileSync('keycloak.json').toString());
-custonKeyCloakConfig.authServerUrl = process.env.KEYCLOAK_AUTH_SERVER_URL;
+// Configure keycloak based on keycloak.json and the KEYCLOAK_AUTH_SERVER_URL env var
+const customKeyCloakConfig = JSON.parse(fs.readFileSync('keycloak.json').toString());
+customKeyCloakConfig.authServerUrl = process.env.KEYCLOAK_AUTH_SERVER_URL;
 
-const keycloak = new Keycloak({ scope: 'USERS', store: memoryStore}, custonKeyCloakConfig);
+const keycloak = new Keycloak({ scope: 'USERS', store: memoryStore }, customKeyCloakConfig);
 
-app.use( keycloak.middleware( { logout: '/api/logout' } ));
+app.use(keycloak.middleware({ logout: '/api/logout' }));
 
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-    next();
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  next();
 });
 
-app.get('/', function (req, res) {
-  res.send('Logged out');
-});
+app.get('/', (req, res) => res.send('Logged out'));
 
-function say_bonjour () {
-  return 'Bonjour de ' + os.hostname();
-}
+const sayBonjour = () => `Bonjour de ${os.hostname()}`;
 
-app.get('/api/bonjour', function (req, resp) {
-  resp.send(say_bonjour());
-});
+app.get('/api/bonjour', (req, resp) => resp.send(sayBonjour()));
 
-app.get( '/api/bonjour-secured', keycloak.protect(), function (req, resp) {
-  resp.send("This is a Secured resource. You're logged as " + req.kauth.grant.access_token.content.name);
-} );
+app.get('/api/bonjour-secured', keycloak.protect(),
+  (req, resp) => resp.send(`This is a Secured resource. You're logged as ${req.kauth.grant.access_token.content.name}`));
 
+app.get('/api/bonjour-chaining', (req, resp) =>
+  circuit.fire(chainingOptions).then((response) => {
+    resp.set('Access-Control-Allow-Origin', '*');
+    resp.send(response);
+  }).catch((e) => resp.send(e))
+);
 
-
-app.get('/api/health', function (req, resp) {
+app.get('/api/health', (req, resp) => {
   resp.set('Access-Control-Allow-Origin', '*');
-  resp.send("I'm ok");
+  resp.send('I am ok');
 });
 
-var server = app.listen(8080, '0.0.0.0', function () {
-  var host = server.address().address;
-  var port = server.address().port;
+const server = app.listen(8080, '0.0.0.0', () => {
+  const host = server.address().address;
+  const port = server.address().port;
 
   console.log('Bonjour service running at http://%s:%s', host, port);
 });
