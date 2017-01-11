@@ -35,7 +35,7 @@ app.use(session({
   store: memoryStore
 }));
 
-// Use our zipkin integration
+console.log("Using ZipKin for distributed tracing.");
 app.use(zipkin);
 
 // Enable CORS
