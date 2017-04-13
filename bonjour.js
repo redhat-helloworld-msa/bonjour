@@ -17,12 +17,15 @@
 const path = require('path');
 const express = require('express');
 const session = require('express-session');
-const zipkin = require('./lib/zipkin');
 const api = require('./lib/api');
+const tracingConfiguration = require('./lib/tracing');
 
 const app = express();
 
 app.use(express.static(path.join(__dirname, 'public/swagger')));
+
+// tracing initialization
+tracingConfiguration.init(app);
 
 // Create a session-store to be used by both the express-session
 // middleware and the keycloak middleware.
@@ -34,9 +37,6 @@ app.use(session({
   saveUninitialized: true,
   store: memoryStore
 }));
-
-// Use our zipkin integration
-app.use(zipkin);
 
 // Enable CORS
 app.use((req, res, next) => {
