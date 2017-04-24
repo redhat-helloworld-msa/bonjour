@@ -26,11 +26,7 @@
     "keycloak-connect": "^2.4.0",
     "opentracing": "^0.13.0",
     "opossum": "^0.5.1",
-    "roi": "~0.13.0",
-    "zipkin": "^0.2.5",
-    "zipkin-context-cls": "^0.2.1",
-    "zipkin-instrumentation-express": "^0.2.5",
-    "zipkin-transport-http": "^0.2.5"
+    "roi": "~0.13.0"
   },
   "devDependencies": {
     "eslint": "~3.11.1",
