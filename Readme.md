@@ -33,5 +33,3 @@ Execute bonjour locally with Docker
 
 3. The application will be running at: <http://localhost:8080/api/bonjour>
 
-
-

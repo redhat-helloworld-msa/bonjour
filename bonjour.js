@@ -18,9 +18,11 @@ const path = require('path');
 const express = require('express');
 const session = require('express-session');
 const api = require('./lib/api');
+const probe = require('kube-probe');
 const tracingConfiguration = require('./lib/tracing');
 
 const app = express();
+probe(app); // add health and readiness checks
 
 app.use(express.static(path.join(__dirname, 'public/swagger')));
 
