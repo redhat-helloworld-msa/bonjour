@@ -5,7 +5,8 @@
   "main": "bonjour.js",
   "scripts": {
     "start": "node bonjour.js",
-    "lint": "eslint bonjour.js"
+    "lint": "eslint bonjour.js",
+    "openshift": "nodeshift --strictSSL=false"
   },
   "repository": {
     "type": "git",
@@ -16,6 +17,15 @@
   "bugs": {
     "url": "https://github.com/redhat-helloworld-msa/bonjour/issues"
   },
+  "files": [
+    "Readme.md",
+    "LICENSE",
+    "bonjour.js",
+    "lib",
+    "package.json",
+    "Dockerfile",
+    "public"
+  ],
   "homepage": "https://github.com/redhat-helloworld-msa/bonjour#readme",
   "dependencies": {
     "es6-shim": "^0.35.1",
@@ -24,9 +34,10 @@
     "jaeger-client": "^3.5.2",
     "keycloak-auth-utils": "3.1.0",
     "keycloak-connect": "^3.1.0",
+    "kube-probe": "^0.2.0",
     "opentracing": "^0.13.0",
     "opossum": "^0.5.1",
-    "roi": "~0.13.0"
+    "roi": "~0.17.0"
   },
   "devDependencies": {
     "eslint": "~3.11.1",
@@ -35,6 +46,7 @@
     "eslint-plugin-promise": "~3.4.0",
     "eslint-plugin-react": "~6.7.1",
     "eslint-plugin-standard": "~2.0.1",
+    "nodeshift": "^1.0.0",
     "swagger-express": "~1.0.5"
   }
 }
